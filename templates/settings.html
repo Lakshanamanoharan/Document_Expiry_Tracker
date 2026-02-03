@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Expiry Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-area">
+                <h1><i class="fa-solid fa-gear"></i> Settings</h1>
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="btn" style="color: #94a3b8;">
+                <i class="fa-solid fa-arrow-left" style="margin-right: 8px;"></i> Back to Dashboard
+            </a>
+        </header>
+
+        <div class="documents-section" style="max-width: 800px; margin: 0 auto;">
+            <div class="section-header">
+                <h2>User Profile</h2>
+            </div>
+            <div style="margin-bottom: 2rem;">
+                <p><strong>Username:</strong> {{ current_user.username }}</p>
+                <p style="color: #94a3b8; font-size: 0.9rem;">Your account identifier for logging in.</p>
+            </div>
+
+            <div class="section-header">
+                <h2>Notification Preferences</h2>
+            </div>
+            <div class="form-group"
+                style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1);">
+                <div>
+                    <h3 style="font-size: 1.1rem; margin-bottom: 0.25rem;">Browser Notifications</h3>
+                    <p style="color: #94a3b8; font-size: 0.9rem;">Get alerted about expiring documents directly in your
+                        browser.</p>
+                </div>
+                <button id="requestNotifications" class="btn btn-primary">Enable</button>
+            </div>
+
+            <div class="form-group"
+                style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); margin-top: 1rem;">
+                <div>
+                    <h3 style="font-size: 1.1rem; margin-bottom: 0.25rem;">Email Alerts (Coming Soon)</h3>
+                    <p style="color: #94a3b8; font-size: 0.9rem;">Daily digest of documents requiring your attention.
+                    </p>
+                </div>
+                <div style="color: #64748b; font-style: italic;">Planned</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const notifyBtn = document.getElementById('requestNotifications');
+
+        function updateBtnUI() {
+            const isEnabled = localStorage.getItem('notifications_enabled') === 'true';
+
+            if (Notification.permission === 'denied') {
+                notifyBtn.innerText = 'Blocked in Browser';
+                notifyBtn.style.background = '#ef4444';
+                notifyBtn.disabled = true;
+            } else if (isEnabled) {
+                notifyBtn.innerText = 'Disable Notifications';
+                notifyBtn.style.background = '#ef4444';
+            } else {
+                notifyBtn.innerText = 'Enable Notifications';
+                notifyBtn.style.background = 'var(--primary)';
+            }
+        }
+
+        updateBtnUI();
+
+        notifyBtn.addEventListener('click', () => {
+            const isEnabled = localStorage.getItem('notifications_enabled') === 'true';
+
+            if (!isEnabled) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        localStorage.setItem('notifications_enabled', 'true');
+                        new Notification("Notifications Enabled!", {
+                            body: "You will now receive alerts for expiring documents.",
+                            icon: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/svgs/solid/bell.svg"
+                        });
+                        updateBtnUI();
+                    }
+                });
+            } else {
+                localStorage.setItem('notifications_enabled', 'false');
+                updateBtnUI();
+            }
+        });
+    </script>
+</body>
+
+</html>

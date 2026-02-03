@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Document - Expiry Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fa-solid fa-cloud-arrow-up"></i> Add Document</h1>
+            <a href="{{ url_for('dashboard') }}" class="btn" style="color: #94a3b8;">
+                <i class="fa-solid fa-arrow-left" style="margin-right: 8px;"></i> Back to Dashboard
+            </a>
+        </header>
+
+        <div class="documents-section" style="max-width: 800px; margin: 0 auto;">
+            <form action="{{ url_for('add_document') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
+
+                <div class="form-group">
+                    <label>Document Type</label>
+                    <select name="type" required>
+                        <option value="Insurance">Insurance Policy</option>
+                        <option value="License">License / Permit</option>
+                        <option value="Contract">Contract / Agreement</option>
+                        <option value="Certificate">Certificate</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="upload-zone" id="dropZone">
+                    <i class="fa-solid fa-file-import"
+                        style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                    <h3>Drag & Drop Files Here</h3>
+                    <p style="color: #94a3b8; margin-bottom: 1.5rem;">or click to browse from your computer</p>
+                    <input type="file" name="files" id="fileInput" multiple required style="display: none;">
+                    <button type="button" class="btn btn-primary"
+                        onclick="document.getElementById('fileInput').click()">
+                        Select Files
+                    </button>
+                    <div id="fileList" style="margin-top: 1.5rem; text-align: left;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Manual Expiry Date (Optional fallback)</label>
+                    <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.5rem;">
+                        We'll try to auto-detect the date. If we can't, use this.
+                    </p>
+                    <input type="date" name="expiry">
+                </div>
+
+                <div class="form-group">
+                    <label>Tags (Comma separated)</label>
+                    <input type="text" name="tags" placeholder="e.g. personal, urgent, tax">
+                </div>
+
+                <div style="text-align: right; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" style="padding: 1rem 2rem;">
+                        <i class="fa-solid fa-check" style="margin-right: 8px;"></i> Upload & Process
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const uploadForm = document.getElementById('uploadForm');
+
+        // We use a DataTransfer object to manage files (add/remove)
+        let container = new DataTransfer();
+
+        // Drag and drop handlers
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            for (let i = 0; i < files.length; i++) {
+                container.items.add(files[i]);
+            }
+            fileInput.files = container.files;
+            updateUI();
+        }
+
+        function removeFile(index) {
+            const newContainer = new DataTransfer();
+            const { files } = container;
+            for (let i = 0; i < files.length; i++) {
+                if (i !== index) newContainer.items.add(files[i]);
+            }
+            container = newContainer;
+            fileInput.files = container.files;
+            updateUI();
+        }
+
+        function updateUI() {
+            fileList.innerHTML = '';
+            const files = container.files;
+
+            if (files.length > 0) {
+                const title = document.createElement('p');
+                title.style.fontSize = '0.9rem';
+                title.style.color = '#94a3b8';
+                title.style.marginBottom = '0.5rem';
+                title.innerText = `Selected Files (${files.length}):`;
+                fileList.appendChild(title);
+            }
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const item = document.createElement('div');
+                item.style.display = 'flex';
+                item.style.justifyContent = 'space-between';
+                item.style.alignItems = 'center';
+                item.style.padding = '0.75rem';
+                item.style.background = 'rgba(255,255,255,0.05)';
+                item.style.marginBottom = '0.5rem';
+                item.style.borderRadius = '0.5rem';
+                item.style.border = '1px solid rgba(255,255,255,0.1)';
+
+                item.innerHTML = `
+                    <div style="display: flex; align-items: center; overflow: hidden;">
+                        <i class="fa-solid fa-file" style="margin-right:12px; color: var(--primary);"></i>
+                        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.9rem;">${file.name}</span>
+                    </div>
+                    <button type="button" onclick="removeFile(${i})" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                `;
+                fileList.appendChild(item);
+            }
+        }
+    </script>
+
+</body>
+
+</html>

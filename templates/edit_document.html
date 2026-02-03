@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Document - Expiry Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fa-solid fa-pen-to-square"></i> Edit Document</h1>
+            <a href="{{ url_for('dashboard') }}" class="btn" style="color: #94a3b8;">
+                <i class="fa-solid fa-arrow-left" style="margin-right: 8px;"></i> Back to Dashboard
+            </a>
+        </header>
+
+        <div class="documents-section" style="max-width: 800px; margin: 0 auto;">
+            <form action="{{ url_for('edit_document', id=doc['id']) }}" method="POST">
+                <div class="form-group">
+                    <label>Document Name</label>
+                    <input type="text" name="name" value="{{ doc['name'] }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Document Type</label>
+                    <select name="type" required>
+                        <option value="Insurance" {% if doc['type']=='Insurance' %}selected{% endif %}>Insurance Policy
+                        </option>
+                        <option value="License" {% if doc['type']=='License' %}selected{% endif %}>License / Permit
+                        </option>
+                        <option value="Contract" {% if doc['type']=='Contract' %}selected{% endif %}>Contract /
+                            Agreement</option>
+                        <option value="Certificate" {% if doc['type']=='Certificate' %}selected{% endif %}>Certificate
+                        </option>
+                        <option value="Other" {% if doc['type']=='Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Expiry Date</label>
+                    <input type="date" name="expiry" value="{{ doc['expiry_date'] }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Tags (Comma separated)</label>
+                    <input type="text" name="tags" value="{{ doc['tags'] or '' }}"
+                        placeholder="e.g. personal, urgent, tax">
+                </div>
+
+                <div style="text-align: right; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" style="padding: 1rem 2rem;">
+                        <i class="fa-solid fa-save" style="margin-right: 8px;"></i> Save Changes
+                    </button>
+                    <a href="{{ url_for('dashboard') }}" class="btn"
+                        style="color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); margin-left:1rem;">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

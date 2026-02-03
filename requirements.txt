@@ -1,0 +1,6 @@
+flask
+dateparser
+pypdf
+python-docx
+Pillow
+pytesseract
